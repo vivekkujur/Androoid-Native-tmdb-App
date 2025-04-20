@@ -15,7 +15,7 @@ interface TMDBApiService {
     suspend fun getMovieDetails(
         @Path("movie_id") movieId: Int,
         @Query("api_key") apiKey: String
-    ): MovieDetailsDto
+    ): MovieDetailsResponse
 }
 
 data class MovieResponse(
@@ -31,17 +31,17 @@ data class MovieDto(
     val vote_average: Double
 )
 
-data class MovieDetailsDto(
-    val id: Int,
-    val title: String,
-    val overview: String,
-    val poster_path: String,
-    val release_date: String,
-    val vote_average: Double,
-    val runtime: Int,
-    val genres: List<GenreDto>,
-    val backdrop_path: String
-)
+//data class MovieDetailsResponse(
+//    val id: Int,
+//    val title: String,
+//    val overview: String,
+//    val poster_path: String,
+//    val release_date: String,
+//    val vote_average: Double,
+//    val runtime: Int,
+//    val genres: List<GenreDto>,
+//    val backdrop_path: String
+//)
 
 data class GenreDto(
     val id: Int,

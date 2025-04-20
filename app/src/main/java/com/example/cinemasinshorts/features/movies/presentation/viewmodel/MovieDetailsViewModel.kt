@@ -4,9 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cinemasinshorts.features.movies.data.local.BookmarkedMovie
-import com.example.cinemasinshorts.features.movies.data.local.BookmarkedMovieDao
-import com.example.cinemasinshorts.features.movies.data.remote.Constants
-import com.example.cinemasinshorts.features.movies.data.remote.TMDBApiService
+import com.example.cinemasinshorts.features.movies.domain.repository.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,8 +33,7 @@ data class MovieDetails(
 
 @HiltViewModel
 class MovieDetailsViewModel @Inject constructor(
-    private val apiService: TMDBApiService,
-    private val bookmarkedMovieDao: BookmarkedMovieDao,
+    private val repository: MovieRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -46,19 +43,19 @@ class MovieDetailsViewModel @Inject constructor(
     private val movieId: Int = savedStateHandle.get<Int>("movieId") ?: 0
 
     init {
-        loadMovieDetails()
+        loadMovieDetails(movieId)
     }
 
-    private fun loadMovieDetails() {
+    fun loadMovieDetails(movieId: Int) {
         viewModelScope.launch {
             try {
                 _state.value = _state.value.copy(isLoading = true)
                 
                 // Check if movie is bookmarked
-                val bookmarkedMovie = bookmarkedMovieDao.getBookmarkedMovie(movieId)
+                val bookmarkedMovie = repository.getBookmarkedMovie(movieId)
                 
                 // Fetch movie details from API
-                val movieDetails = apiService.getMovieDetails(movieId, Constants.TMDB_API_KEY)
+                val movieDetails = repository.getMovieDetails(movieId)
                 
                 // Convert to UI state
                 val movieDetailsState = MovieDetails(
@@ -95,7 +92,7 @@ class MovieDetailsViewModel @Inject constructor(
                 
                 if (movieDetails.isBookmarked) {
                     // Remove from bookmarks
-                    bookmarkedMovieDao.deleteBookmarkedMovie(
+                    repository.deleteBookmarkedMovie(
                         BookmarkedMovie(
                             id = movieDetails.id,
                             title = movieDetails.title,
@@ -110,7 +107,7 @@ class MovieDetailsViewModel @Inject constructor(
                     )
                 } else {
                     // Add to bookmarks
-                    bookmarkedMovieDao.insertBookmarkedMovie(
+                    repository.insertBookmarkedMovie(
                         BookmarkedMovie(
                             id = movieDetails.id,
                             title = movieDetails.title,

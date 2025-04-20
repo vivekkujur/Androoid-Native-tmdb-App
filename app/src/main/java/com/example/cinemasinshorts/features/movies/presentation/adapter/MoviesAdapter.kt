@@ -1,5 +1,6 @@
 package com.example.cinemasinshorts.features.movies.presentation.adapter
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -9,6 +10,8 @@ import com.bumptech.glide.Glide
 import com.example.cinemasinshorts.R
 import com.example.cinemasinshorts.databinding.ItemMovieBinding
 import com.example.cinemasinshorts.features.movies.data.model.Movie
+import com.example.cinemasinshorts.features.movies.data.remote.Constants
+import com.example.cinemasinshorts.features.movies.presentation.MovieDetailsActivity
 
 class MoviesAdapter(
     private val onBookmarkClick: (Movie) -> Unit
@@ -20,31 +23,43 @@ class MoviesAdapter(
             parent,
             false
         )
-        return MovieViewHolder(binding)
+        return MovieViewHolder(binding, onBookmarkClick)
     }
 
     override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    inner class MovieViewHolder(
-        private val binding: ItemMovieBinding
+    class MovieViewHolder(
+        private val binding: ItemMovieBinding,
+        private val onBookmarkClick: (Movie) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(movie: Movie) {
-            binding.movie = movie
-            binding.executePendingBindings()
+        init {
+            binding.root.setOnClickListener {
+                val movie = binding.movie
+                movie?.let {
+                    val intent = Intent(binding.root.context, MovieDetailsActivity::class.java).apply {
+                        putExtra("movieId", it.id)
+                    }
+                    binding.root.context.startActivity(intent)
+                }
+            }
 
-            // Load movie poster
-            Glide.with(binding.root)
-                .load("https://image.tmdb.org/t/p/w500${movie.posterPath}")
-                .placeholder(R.drawable.ic_launcher_background)
-                .error(R.drawable.ic_launcher_background)
-                .into(binding.ivMoviePoster)
-
-            // Handle bookmark click
             binding.ivBookmark.setOnClickListener {
-                onBookmarkClick(movie)
+                val movie = binding.movie
+                movie?.let { onBookmarkClick(it) }
+            }
+        }
+
+        fun bind(movie: Movie) {
+            binding.apply {
+                this.movie = movie
+                Glide.with(ivMoviePoster)
+                    .load("${Constants.TMDB_IMAGE_BASE_URL}${Constants.ImageSizes.POSTER}${movie.posterPath}")
+                    .placeholder(R.drawable.ic_placeholder)
+                    .error(R.drawable.ic_error)
+                    .into(ivMoviePoster)
             }
         }
     }

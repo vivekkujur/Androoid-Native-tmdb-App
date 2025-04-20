@@ -1,11 +1,8 @@
 package com.example.cinemasinshorts.di
 
 import android.app.Application
-import androidx.room.Room
-import com.example.cinemasinshorts.features.movies.data.local.MovieDatabase
 import com.example.cinemasinshorts.features.movies.data.remote.TMDBApiService
-import com.example.cinemasinshorts.features.movies.domain.repository.MovieRepository
-import com.example.cinemasinshorts.features.movies.data.repository.MovieRepositoryImpl
+import com.example.cinemasinshorts.features.movies.data.remote.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,7 +31,7 @@ object AppModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://api.themoviedb.org/3/")
+            .baseUrl(Constants.TMDB_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -44,24 +41,5 @@ object AppModule {
     @Singleton
     fun provideTMDBApiService(retrofit: Retrofit): TMDBApiService {
         return retrofit.create(TMDBApiService::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideMovieDatabase(app: Application): MovieDatabase {
-        return Room.databaseBuilder(
-            app,
-            MovieDatabase::class.java,
-            "movie_database"
-        ).build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideMovieRepository(
-        apiService: TMDBApiService,
-        database: MovieDatabase
-    ): MovieRepository {
-        return MovieRepositoryImpl(apiService, database.movieDao())
     }
 } 

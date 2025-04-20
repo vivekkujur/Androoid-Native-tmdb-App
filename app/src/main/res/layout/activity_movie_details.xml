@@ -7,6 +7,11 @@
         <variable
             name="viewModel"
             type="com.example.cinemasinshorts.features.movies.presentation.viewmodel.MovieDetailsViewModel" />
+        <variable
+            name="state"
+            type="com.example.cinemasinshorts.features.movies.presentation.viewmodel.MovieDetailsState" />
+        <import type="android.view.View"/>
+
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -23,7 +28,7 @@
                 app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
                 <ImageView
-                    android:id="@+id/ivBackdrop"
+                    android:id="@+id/backdropImage"
                     android:layout_width="match_parent"
                     android:layout_height="300dp"
                     android:scaleType="centerCrop"
@@ -41,8 +46,10 @@
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.core.widget.NestedScrollView
+            android:id="@+id/contentLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:visibility="@{state.isLoading ? View.GONE : View.VISIBLE}"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -51,7 +58,7 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:id="@+id/ivPoster"
+                    android:id="@+id/posterImage"
                     android:layout_width="120dp"
                     android:layout_height="180dp"
                     android:layout_marginTop="-90dp"
@@ -61,93 +68,93 @@
                     tools:src="@tools:sample/backgrounds/scenic" />
 
                 <TextView
-                    android:id="@+id/tvTitle"
+                    android:id="@+id/titleText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:text="@{viewModel.movieDetails.title}"
+                    android:text="@{state.movieDetails.title}"
                     android:textColor="@android:color/black"
                     android:textSize="24sp"
                     android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@+id/ivBookmark"
-                    app:layout_constraintStart_toEndOf="@+id/ivPoster"
-                    app:layout_constraintTop_toTopOf="@+id/ivPoster" />
+                    app:layout_constraintEnd_toStartOf="@+id/bookmarkIconView"
+                    app:layout_constraintStart_toEndOf="@+id/posterImage"
+                    app:layout_constraintTop_toTopOf="@+id/posterImage" />
 
                 <ImageView
-                    android:id="@+id/ivBookmark"
+                    android:id="@+id/bookmarkIconView"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@{viewModel.movieDetails.isBookmarked ? @drawable/ic_bookmark_filled : @drawable/ic_bookmark_border}"
+                    android:src="@{state.movieDetails.isBookmarked ? @drawable/ic_bookmark_filled : @drawable/ic_bookmark_outline}"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/tvTitle" />
+                    app:layout_constraintTop_toTopOf="@+id/titleText" />
 
                 <TextView
-                    android:id="@+id/tvReleaseDate"
+                    android:id="@+id/releaseDateText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="@{viewModel.movieDetails.releaseDate}"
+                    android:text="@{state.movieDetails.releaseDate}"
                     android:textColor="@android:color/darker_gray"
-                    app:layout_constraintStart_toStartOf="@+id/tvTitle"
-                    app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+                    app:layout_constraintStart_toStartOf="@+id/titleText"
+                    app:layout_constraintTop_toBottomOf="@+id/titleText" />
 
                 <TextView
-                    android:id="@+id/tvRuntime"
+                    android:id="@+id/runtimeText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="@{viewModel.movieDetails.runtime + ` min`}"
+                    android:text="@{@string/runtime_format(state.movieDetails.runtime)}"
                     android:textColor="@android:color/darker_gray"
-                    app:layout_constraintStart_toEndOf="@+id/tvReleaseDate"
-                    app:layout_constraintTop_toTopOf="@+id/tvReleaseDate" />
+                    app:layout_constraintStart_toEndOf="@+id/releaseDateText"
+                    app:layout_constraintTop_toTopOf="@+id/releaseDateText" />
 
                 <TextView
-                    android:id="@+id/tvGenres"
+                    android:id="@+id/genresText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="@{viewModel.movieDetails.genres}"
+                    android:text="@{state.movieDetails.genres}"
                     android:textColor="@android:color/darker_gray"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/tvTitle"
-                    app:layout_constraintTop_toBottomOf="@+id/tvReleaseDate" />
+                    app:layout_constraintStart_toStartOf="@+id/titleText"
+                    app:layout_constraintTop_toBottomOf="@+id/releaseDateText" />
 
                 <TextView
-                    android:id="@+id/tvOverview"
+                    android:id="@+id/overviewText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="@{viewModel.movieDetails.overview}"
+                    android:text="@{state.movieDetails.overview}"
                     android:textColor="@android:color/black"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/ivPoster" />
-
-                <ProgressBar
-                    android:id="@+id/progressBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="@{viewModel.isLoading ? View.VISIBLE : View.GONE}"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvError"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@{viewModel.error}"
-                    android:textColor="@android:color/holo_red_dark"
-                    android:visibility="@{viewModel.error != null ? View.VISIBLE : View.GONE}"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@+id/posterImage" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.core.widget.NestedScrollView>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@{state.isLoading ? View.VISIBLE : View.GONE}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/errorText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{state.error}"
+            android:textColor="@android:color/holo_red_dark"
+            android:visibility="@{state.error != null ? View.VISIBLE : View.GONE}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout> 
